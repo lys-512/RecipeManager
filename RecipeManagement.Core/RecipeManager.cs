@@ -195,14 +195,44 @@ public sealed class RecipeManager : IRecipeManager
         return new List<int>(_cookingPlan).AsReadOnly();
     }
 
-    public bool StartCooking(int recipeId) =>
-        throw new NotImplementedException("Step 6: implement StartCooking.");
+    // ── 烹饪指令队列（Queue<string>，FIFO） ──
 
-    public string? PeekNextInstruction() =>
-        throw new NotImplementedException("Step 6: implement PeekNextInstruction.");
+    // 开始烹饪指定食谱：清空旧队列，把食谱的指令按原顺序入队。
+    public bool StartCooking(int recipeId)
+    {
+        var recipe = FindRecipe(recipeId);
+        if (recipe == null || recipe.Instructions.Count == 0)
+            return false;
 
-    public string? CompleteNextInstruction() =>
-        throw new NotImplementedException("Step 6: implement CompleteNextInstruction.");
+        // 先清空之前的指令队列
+        _instructionQueue.Clear();
+
+        // 按原始顺序逐条入队
+        foreach (var instruction in recipe.Instructions)
+        {
+            _instructionQueue.Enqueue(instruction);
+        }
+
+        return true;
+    }
+
+    // 查看下一条指令但不取出。队列空返回 null。
+    public string? PeekNextInstruction()
+    {
+        if (_instructionQueue.Count == 0)
+            return null;
+
+        return _instructionQueue.Peek();
+    }
+
+    // 完成下一条指令：取出并返回队首。队列空返回 null。
+    public string? CompleteNextInstruction()
+    {
+        if (_instructionQueue.Count == 0)
+            return null;
+
+        return _instructionQueue.Dequeue();
+    }
 
     // ── Part B（后续作业） ──
     public IReadOnlyList<Recipe> SearchByTitle(string searchText) =>
