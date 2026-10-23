@@ -151,14 +151,42 @@ public sealed class RecipeManager : IRecipeManager
         return true;
     }
 
-    public bool RemoveRecipeFromCookingPlan(int recipeId) =>
-        throw new NotImplementedException("Step 5: implement RemoveRecipeFromCookingPlan.");
+    // 从烹饪计划中移除食谱 ID，并把它压入移除历史栈。
+    public bool RemoveRecipeFromCookingPlan(int recipeId)
+    {
+        if (!_cookingPlan.Contains(recipeId))
+            return false;
 
-    public bool RestoreLastRemovedRecipe() =>
-        throw new NotImplementedException("Step 5: implement RestoreLastRemovedRecipe.");
+        _cookingPlan.Remove(recipeId);
+        // 成功移除后才压栈——规范说失败时不能动栈
+        _removedHistory.Push(recipeId);
+        return true;
+    }
 
-    public int? PeekLastRemovedRecipe() =>
-        throw new NotImplementedException("Step 5: implement PeekLastRemovedRecipe.");
+    // 弹出最近移除的食谱 ID，追加回烹饪计划末尾。
+    public bool RestoreLastRemovedRecipe()
+    {
+        if (_removedHistory.Count == 0)
+            return false;
+
+        var recipeId = _removedHistory.Pop();
+
+        // 食谱必须还存在，且还没在计划里
+        if (FindRecipe(recipeId) == null || _cookingPlan.Contains(recipeId))
+            return false;
+
+        _cookingPlan.AddLast(recipeId);
+        return true;
+    }
+
+    // 查看栈顶 ID 但不弹出。空栈返回 null。
+    public int? PeekLastRemovedRecipe()
+    {
+        if (_removedHistory.Count == 0)
+            return null;
+
+        return _removedHistory.Peek();
+    }
 
     // 按计划顺序返回所有食谱 ID 的只读列表。
     public IReadOnlyList<int> GetCookingPlan()
