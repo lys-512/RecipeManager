@@ -106,14 +106,34 @@ public sealed class RecipeManager : IRecipeManager
 
     // ── 下面方法在后续步骤实现 ──
 
-    public int AddIngredientsToShoppingList(int recipeId) =>
-        throw new NotImplementedException("Step 3: implement AddIngredientsToShoppingList.");
+    // ── 购物清单（List<string>） ──
 
-    public IReadOnlyList<string> GetShoppingList() =>
-        throw new NotImplementedException("Step 3: implement GetShoppingList.");
+    // 把指定食谱的所有食材追加到购物清单末尾。返回添加了多少条。
+    public int AddIngredientsToShoppingList(int recipeId)
+    {
+        var recipe = FindRecipe(recipeId);
+        if (recipe == null)
+            return 0;
 
-    public void ClearShoppingList() =>
-        throw new NotImplementedException("Step 3: implement ClearShoppingList.");
+        foreach (var ingredient in recipe.Ingredients)
+        {
+            _shoppingList.Add(ingredient);
+        }
+
+        return recipe.Ingredients.Count;
+    }
+
+    // 返回当前购物清单的只读视图（外部不能通过这个改内部 List）。
+    public IReadOnlyList<string> GetShoppingList()
+    {
+        return _shoppingList.AsReadOnly();
+    }
+
+    // 清空购物清单。
+    public void ClearShoppingList()
+    {
+        _shoppingList.Clear();
+    }
 
     public bool AddRecipeToCookingPlan(int recipeId) =>
         throw new NotImplementedException("Step 4: implement AddRecipeToCookingPlan.");
