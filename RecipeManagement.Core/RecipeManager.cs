@@ -135,8 +135,21 @@ public sealed class RecipeManager : IRecipeManager
         _shoppingList.Clear();
     }
 
-    public bool AddRecipeToCookingPlan(int recipeId) =>
-        throw new NotImplementedException("Step 4: implement AddRecipeToCookingPlan.");
+    // ── 烹饪计划（LinkedList<int>） ──
+
+    // 把食谱 ID 追加到烹饪计划末尾。食谱不存在或已在计划中则返回 false。
+    public bool AddRecipeToCookingPlan(int recipeId)
+    {
+        if (FindRecipe(recipeId) == null)
+            return false;
+
+        if (_cookingPlan.Contains(recipeId))
+            return false;
+
+        // AddLast = 追加到链表末尾（规范要求的行为）
+        _cookingPlan.AddLast(recipeId);
+        return true;
+    }
 
     public bool RemoveRecipeFromCookingPlan(int recipeId) =>
         throw new NotImplementedException("Step 5: implement RemoveRecipeFromCookingPlan.");
@@ -147,8 +160,12 @@ public sealed class RecipeManager : IRecipeManager
     public int? PeekLastRemovedRecipe() =>
         throw new NotImplementedException("Step 5: implement PeekLastRemovedRecipe.");
 
-    public IReadOnlyList<int> GetCookingPlan() =>
-        throw new NotImplementedException("Step 4: implement GetCookingPlan.");
+    // 按计划顺序返回所有食谱 ID 的只读列表。
+    public IReadOnlyList<int> GetCookingPlan()
+    {
+        // 复制一份再返回，外部改不了内部 LinkedList
+        return new List<int>(_cookingPlan).AsReadOnly();
+    }
 
     public bool StartCooking(int recipeId) =>
         throw new NotImplementedException("Step 6: implement StartCooking.");
